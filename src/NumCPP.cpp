@@ -11,7 +11,7 @@
 
 // Requires OpenCL Library and supported platforms. 
 
-#include "numcpp.h"
+#include "../headers/numcpp.h"
 
 using namespace numcpp;
 int main() {
@@ -19,7 +19,7 @@ int main() {
     // All matrix functions can be called after calling init_parallel()
     parallel::init_parallel();
 
-    Matrix matA(20, 10);
+    Matrix matA(200000, 100);
     MatrixStatus status = matA.initialize_matrix(true, 10);
 
     // Matrix objects can be directly output using cout.
@@ -27,7 +27,7 @@ int main() {
     std::cout << "\nMatrix A" << std::endl;
     std::cout << matA;
 
-    Matrix matB(10, 1);
+    Matrix matB(100, 100);
     status = matB.initialize_matrix(true, 2);
 
     std::cout << "\nMatrix B" << std::endl;
@@ -42,8 +42,12 @@ int main() {
     std::cout << "\nResult" << std::endl;
     std::cout << matC;
 
-    Matrix matD = matmul(matC, matB);
+    Matrix matD = transpose(matA);
     std::cout << "\nResult of MatMul" << std::endl;
+    std::cout << matD;
+
+    matD = transpose(matD);
+    std::cout << "\nResult of Transpose" << std::endl;
     std::cout << matD;
 
     matA.cleap_up();

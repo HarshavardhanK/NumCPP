@@ -6,3 +6,8 @@
 #### Supported Operations
 ###### Matrix-on-Scalar operations: +, -, *, <, <=, ==, >=, >, ^
 ###### Matrix-on-Matrix (element-wise) operations: +, -, *, <, <=, ==, >
+###### Matrix argument based functions: Matrix matmul(Matrix) and Matrix transpose(Matrix)
+
+##### For tasks as simple as transpose, NumCPP performs over 40% faster than C++.
+
+###### This project is developed, maintained and deployed by Rakshit GL. (https://www.linkedin.com/in/rakshitgl) 

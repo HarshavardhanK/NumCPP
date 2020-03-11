@@ -303,6 +303,99 @@ namespace numcpp {
 
 		return result;
 	}
+
+	Matrix transpose(Matrix a) {
+
+		cl_int ret;
+		auto* output = new float[a.get_rows() * a.get_columns()];
+
+		Matrix result(a.get_columns(), a.get_rows());
+
+		cl_mem memory_input_a = clCreateBuffer(context, CL_MEM_READ_ONLY,
+			a.get_rows() * a.get_columns() * sizeof(float), nullptr, &ret);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Memory buffer could not be created.", 92);
+		}
+
+		cl_mem memory_output_a = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
+			a.get_rows() * a.get_columns() * sizeof(float), nullptr, &ret);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Memory buffer could not be created.", 92);
+		}
+
+		ret = clEnqueueWriteBuffer(queue, memory_input_a, CL_TRUE, 0,
+			a.get_rows() * a.get_columns() * sizeof(float), a.get_matrix(), 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Memory buffer value could not be set.", 93);
+		}
+
+		int cols = a.get_columns();
+
+		ret = clSetKernelArg(matrix_kernel_transpose, 0, sizeof(int), (void*)&cols);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+
+		ret = clSetKernelArg(matrix_kernel_transpose, 1, sizeof(cl_mem), (void*)&memory_input_a);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+		
+		ret = clSetKernelArg(matrix_kernel_transpose, 2, sizeof(cl_mem), (void*)&memory_output_a);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+
+		const size_t local_work_size[2] = { 1, 1 };
+		const size_t global_work_size[2] = { a.get_rows(), a.get_columns() };
+
+		ret = clEnqueueNDRangeKernel(queue, matrix_kernel_transpose, 2, nullptr,
+			global_work_size, local_work_size, 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Error launching kernel.", 95);
+		}
+
+		ret = clFinish(queue);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Error synchronizing kernel tasks.", 96);
+		}
+
+		ret = clEnqueueReadBuffer(queue, memory_output_a, CL_TRUE, 0,
+			a.get_rows() * a.get_columns() * sizeof(float), output, 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Error reading output from kernel.", 97);
+		}
+
+		cl_int retd = clReleaseMemObject(memory_input_a);
+		cl_int retf = clReleaseMemObject(memory_output_a);
+
+		if (retd != 0 || retf != 0) {
+
+			std::cerr << "98: WARNING: Error clearing kernel space. Memory leaks may happen.\n";
+		}
+
+		result.set_matrix(output);
+
+		return result;
+	}
 }
 
 Matrix operator+(Matrix& first, Matrix const& second) {

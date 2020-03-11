@@ -3,77 +3,77 @@
 //
 
 kernel void parallel_adder(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] + b[i];
 }
 
 kernel void parallel_subtracter(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] - b[i];
 }
 
 kernel void parallel_multiplier(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] * b[i];
 }
 
 kernel void parallel_gt(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] > b[i];
 }
 
 kernel void parallel_lt(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] < b[i];
 }
 
 kernel void parallel_equals(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] == b[i];
 }
 
 kernel void parallel_gte(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] >= b[i];
 }
 
 kernel void parallel_lte(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] <= b[i];
 }
 
 kernel void scalar_parallel_multiplier(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] * b[0];
 }
 
 kernel void scalar_parallel_gt(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] > b[0];
 }
 
 kernel void scalar_parallel_lt(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] < b[0];
 }
 
 kernel void scalar_parallel_equals(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] == b[0];
 }
 
 kernel void scalar_parallel_gte(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] >= b[0];
 }
 
 kernel void scalar_parallel_lte(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = a[i] <= b[0];
 }
 
 kernel void scalar_parallel_power(global float* a, global float* b, global float* results) {
-    int i = get_global_id(0);
+    long long int i = get_global_id(0);
     results[i] = pow(a[i],b[0]);
 }
 
@@ -112,4 +112,12 @@ kernel void parallel_matrix_multiply(const int M, const int N, const int K, cons
     }
 
     C[col*M + row] = sum;
+}
+
+kernel void parallel_transpose(const int N, const global float* A, global float* B) {
+    
+    const int row = get_global_id(0);
+    const int col = get_global_id(1);
+
+    B[col*N + row] = A[row*N + col];
 }

@@ -27,6 +27,7 @@ namespace parallel {
 	cl_command_queue queue;
 	cl_program program;
 
+	//These kernels have been overloaded on operators (Matrix-on-Matrix)
 	cl_kernel kernel_add;
 	cl_kernel kernel_subtract;
 	cl_kernel kernel_multiply;
@@ -36,6 +37,7 @@ namespace parallel {
 	cl_kernel kernel_gte;
 	cl_kernel kernel_lte;
 
+	//These kernels have been overloaded on operators (Matrix-on-Scalar)
 	cl_kernel scalar_kernel_multiply;
 	cl_kernel scalar_kernel_gt;
 	cl_kernel scalar_kernel_lt;
@@ -46,7 +48,9 @@ namespace parallel {
 	cl_kernel scalar_kernel_adder;
 	cl_kernel scalar_kernel_subtracter;
 
+	//These kernels have been implemented as functions
 	cl_kernel matrix_kernel_multiply;
+	cl_kernel matrix_kernel_transpose;
 
 	void init_parallel() {
 
@@ -216,6 +220,13 @@ namespace parallel {
 			if (ret != 0) {
 
 				throw MatrixStatus("Error creating kernel program. (Matrix Multiplier)", 101);
+			}
+
+			matrix_kernel_transpose = clCreateKernel(program, "parallel_transpose", &ret);
+
+			if (ret != 0) {
+
+				throw MatrixStatus("Error creating kernel program. (Matrix Tranpose)", 101);
 			}
 
 		}

@@ -150,16 +150,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="NumCPP.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="setup_parallel.h" />
-    <ClInclude Include="matrix.h" />
-    <ClInclude Include="matrix_ops.h" />
-    <ClInclude Include="numcpp.h" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="kernels\kernel.cl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="headers\matrix.h" />
+    <ClInclude Include="headers\matrix_ops.h" />
+    <ClInclude Include="headers\numcpp.h" />
+    <ClInclude Include="headers\setup_parallel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\NumCPP.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
