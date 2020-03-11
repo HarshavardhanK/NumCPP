@@ -8,6 +8,12 @@
 #include "matrix.h"
 #include "setup_parallel.h"
 
+using namespace numcpp;
+using namespace parallel;
+
+#define TS 32
+#define WPT 8
+
 namespace numcpp {
 
 	int is_broadcast_possible(const Matrix* valid_a, const Matrix* valid_b, long long int* highest_cols,
@@ -168,42 +174,136 @@ namespace numcpp {
 		}
 	}
 
-    Matrix matmul(Matrix a, Matrix b) {
+	Matrix matmul(Matrix a, Matrix b) {
 
-        try {
+		cl_int ret;
+		auto* output = new float[a.get_rows() * b.get_columns()];
 
-            if (a.get_columns() != b.get_rows()) {
-                throw MatrixStatus("Dimensions did not match for matrix multiplication.", 11);
-            }
+		Matrix result(a.get_rows(), b.get_columns());
 
-            Matrix result(a.get_rows(), b.get_columns());
-            result.set_matrix(new float[b.get_columns() * a.get_rows()]);
+		cl_mem memory_input_a = clCreateBuffer(context, CL_MEM_READ_ONLY,
+			a.get_rows() * a.get_columns() * sizeof(float), nullptr, &ret);
 
-            for (long long int i = 0; i < a.get_rows(); i++) {
+		if (ret != 0) {
 
-                for (long long int j = 0; j < b.get_columns(); j++) {
-                    result.set_element(i, j, 0);
+			throw MatrixStatus("Memory buffer could not be created.", 92);
+		}
 
-                    for (long long int x = 0; x < a.get_columns(); x++) {
+		cl_mem memory_input_b = clCreateBuffer(context, CL_MEM_READ_ONLY,
+			b.get_rows() * b.get_columns() * sizeof(float), nullptr, &ret);
 
-                        result.set_element(i, j, result.get_element(i, j) + (a.get_element(i, x) * b.get_element(x, j)));
-                    }
-                }
-            }
+		if (ret != 0) {
 
-            return result;
-        }
-        catch (MatrixStatus & status) {
+			throw MatrixStatus("Memory buffer could not be created.", 92);
+		}
 
-            std::cout << std::endl << status.get_error_code() << ": " << status.get_error_message() << std::endl
-                << "Aborting..." << std::endl;
-            exit(0);
-        }
-    }
+		cl_mem memory_output_a = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
+			a.get_rows() * b.get_columns() * sizeof(float), nullptr, &ret);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Memory buffer could not be created.", 92);
+		}
+
+		ret = clEnqueueWriteBuffer(queue, memory_input_a, CL_TRUE, 0,
+			a.get_rows() * a.get_columns() * sizeof(float), a.get_matrix(), 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Memory buffer value could not be set.", 93);
+		}
+
+		ret = clEnqueueWriteBuffer(queue, memory_input_b, CL_TRUE, 0,
+			b.get_rows() * b.get_columns() * sizeof(float), b.get_matrix(), 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Memory buffer value could not be set.", 93);
+		}
+
+		int rows = a.get_rows(), cols = b.get_columns(), inter = b.get_rows();
+		
+		ret = clSetKernelArg(matrix_kernel_multiply, 0, sizeof(int), (void*)&rows);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+		
+		ret = clSetKernelArg(matrix_kernel_multiply, 1, sizeof(int), (void*)&cols);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+		
+		ret = clSetKernelArg(matrix_kernel_multiply, 2, sizeof(int), (void*)&inter);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+
+		ret = clSetKernelArg(matrix_kernel_multiply, 3, sizeof(cl_mem), (void*)&memory_input_a);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+		ret = clSetKernelArg(matrix_kernel_multiply, 4, sizeof(cl_mem), (void*)&memory_input_b);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+		ret = clSetKernelArg(matrix_kernel_multiply, 5, sizeof(cl_mem), (void*)&memory_output_a);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Kernel arguments could not be set.", 94);
+		}
+
+		const size_t local_work_size[2] = { 1, 1 };
+		const size_t global_work_size[2] = { a.get_rows(), b.get_columns() };
+
+		ret = clEnqueueNDRangeKernel(queue, matrix_kernel_multiply, 2, nullptr,
+			global_work_size, local_work_size, 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Error launching kernel.", 95);
+		}
+
+		ret = clFinish(queue);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Error synchronizing kernel tasks.", 96);
+		}
+
+		ret = clEnqueueReadBuffer(queue, memory_output_a, CL_TRUE, 0,
+			a.get_rows() * b.get_columns() * sizeof(float), output, 0, nullptr, nullptr);
+
+		if (ret != 0) {
+
+			throw MatrixStatus("Error reading output from kernel.", 97);
+		}
+
+		cl_int retd = clReleaseMemObject(memory_input_a);
+		cl_int rete = clReleaseMemObject(memory_input_b);
+		cl_int retf = clReleaseMemObject(memory_output_a);
+
+		if (retd != 0 || rete != 0 || retf != 0) {
+
+			std::cerr << "98: WARNING: Error clearing kernel space. Memory leaks may happen.\n";
+		}
+
+		result.set_matrix(output);
+
+
+		return result;
+	}
 }
-
-using namespace numcpp;
-using namespace parallel;
 
 Matrix operator+(Matrix& first, Matrix const& second) {
 

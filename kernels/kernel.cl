@@ -100,3 +100,16 @@ kernel void scalar_parallel_subtracter(global float* a, global float* b, global 
     if(r==c)
         results[i] = results[i] - b[0];
 }
+
+kernel void parallel_matrix_multiply(const int M, const int N, const int K, const global float* A, const global float* B, global float* C) {
+    
+    const int row = get_global_id(0);
+    const int col = get_global_id(1);
+
+    float sum = 0.0f;
+    for (int k=0; k<K; k++) {
+        sum += A[k*M + row] * B[col*K + k];
+    }
+
+    C[col*M + row] = sum;
+}

@@ -46,6 +46,8 @@ namespace parallel {
 	cl_kernel scalar_kernel_adder;
 	cl_kernel scalar_kernel_subtracter;
 
+	cl_kernel matrix_kernel_multiply;
+
 	void init_parallel() {
 
 		try {
@@ -207,6 +209,13 @@ namespace parallel {
 			if (ret != 0) {
 
 				throw MatrixStatus("Error creating kernel program. (Scalar Subtracter)", 101);
+			}
+
+			matrix_kernel_multiply = clCreateKernel(program, "parallel_matrix_multiply", &ret);
+
+			if (ret != 0) {
+
+				throw MatrixStatus("Error creating kernel program. (Matrix Multiplier)", 101);
 			}
 
 		}

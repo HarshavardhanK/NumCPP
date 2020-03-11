@@ -19,7 +19,7 @@ int main() {
     // All matrix functions can be called after calling init_parallel()
     parallel::init_parallel();
 
-    Matrix matA(20, 20);
+    Matrix matA(20, 10);
     MatrixStatus status = matA.initialize_matrix(true, 10);
 
     // Matrix objects can be directly output using cout.
@@ -27,8 +27,8 @@ int main() {
     std::cout << "\nMatrix A" << std::endl;
     std::cout << matA;
 
-    Matrix matB(1, 1);
-    status = matB.initialize_matrix(true, 10);
+    Matrix matB(10, 1);
+    status = matB.initialize_matrix(true, 2);
 
     std::cout << "\nMatrix B" << std::endl;
     std::cout << matB;
@@ -42,9 +42,14 @@ int main() {
     std::cout << "\nResult" << std::endl;
     std::cout << matC;
 
+    Matrix matD = matmul(matC, matB);
+    std::cout << "\nResult of MatMul" << std::endl;
+    std::cout << matD;
+
     matA.cleap_up();
     matB.cleap_up();
     matC.cleap_up();
+    matD.cleap_up();
 
     parallel::finish_parallel();
     // Program should end with finish_parallel() and [clean_up() for each matrix]
