@@ -254,6 +254,13 @@ namespace parallel {
 	void finish_parallel() {
 		cl_int reta = clFlush(queue);
 		cl_int retb = clReleaseKernel(kernel_add);
+		cl_int retd = clReleaseKernel(kernel_multiply);
+		cl_int rete = clReleaseKernel(kernel_subtract);
+		cl_int retf = clReleaseKernel(kernel_gt);
+		cl_int reti = clReleaseKernel(kernel_lt);
+		cl_int retj = clReleaseKernel(kernel_equals);
+		cl_int retk = clReleaseKernel(kernel_gte);
+		cl_int retl = clReleaseKernel(kernel_lte);
 		cl_int retc = clReleaseProgram(program);
 		cl_int retg = clReleaseCommandQueue(queue);
 		cl_int reth = clReleaseContext(context);

@@ -19,7 +19,7 @@ int main() {
     // All matrix functions can be called after calling init_parallel()
     parallel::init_parallel();
 
-    Matrix matA(200000, 100);
+    Matrix matA(20, 10);
     MatrixStatus status = matA.initialize_matrix(true, 10);
 
     // Matrix objects can be directly output using cout.
@@ -27,7 +27,7 @@ int main() {
     std::cout << "\nMatrix A" << std::endl;
     std::cout << matA;
 
-    Matrix matB(100, 100);
+    Matrix matB(10, 10);
     status = matB.initialize_matrix(true, 2);
 
     std::cout << "\nMatrix B" << std::endl;
